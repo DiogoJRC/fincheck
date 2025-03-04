@@ -23,6 +23,7 @@ model User {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   bankAccounts BankAccount[]
+  categories   TransactionCategory[]
 
   @@map("users")
 }
@@ -49,4 +50,26 @@ model BankAccount {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("bank_accounts")
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+
+  @@map("transaction_type")
+}
+
+model TransactionCategory {
+  id        Int             @id @default(autoincrement())
+  uuid      String          @unique @default(uuid()) @db.Uuid
+  userId    Int             @map("user_id")
+  name      String
+  icon      String
+  type      TransactionType
+  createdAt DateTime        @default(now()) @map("created_at")
+  updatedAt DateTime        @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("transaction_categories")
 }
