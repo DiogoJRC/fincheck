@@ -24,6 +24,7 @@ model User {
 
   bankAccounts BankAccount[]
   categories   TransactionCategory[]
+  transactions Transaction[]
 
   @@map("users")
 }
@@ -47,6 +48,8 @@ model BankAccount {
   createdAt      DateTime        @default(now()) @map("created_at")
   updatedAt      DateTime        @updatedAt @map("updated_at")
 
+  transactions Transaction[]
+
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("bank_accounts")
@@ -69,7 +72,28 @@ model TransactionCategory {
   createdAt DateTime        @default(now()) @map("created_at")
   updatedAt DateTime        @updatedAt @map("updated_at")
 
-  user User @relation(fields: [userId], references: [id])
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
 
   @@map("transaction_categories")
+}
+
+model Transaction {
+  id            Int             @id @default(autoincrement())
+  uuid          String          @unique @default(uuid()) @db.Uuid
+  userId        Int             @map("user_id")
+  bankAccountId Int             @map("bank_account_id")
+  categoryId    Int?            @map("category_id")
+  name          String
+  value         Float
+  date          DateTime
+  type          TransactionType
+  createdAt     DateTime        @default(now()) @map("created_at")
+  updatedAt     DateTime        @updatedAt @map("updated_at")
+
+  user        User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bankAccount BankAccount          @relation(fields: [bankAccountId], references: [id], onDelete: Cascade)
+  category    TransactionCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  @@map("transactions")
 }
