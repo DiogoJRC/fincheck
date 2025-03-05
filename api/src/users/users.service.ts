@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from 'src/database/prisma.service';
@@ -8,12 +8,18 @@ export class UsersService {
   constructor(private readonly prismaService: PrismaService) {}
 
   async create(createUserDto: CreateUserDto) {
+    const { name, email, password } = createUserDto;
+
+    const emailAlreadyInUse = await this.prismaService.user.findUnique({
+      where: { email },
+    });
+
+    if (emailAlreadyInUse) {
+      throw new ConflictException('This email is already in use!');
+    }
+
     const user = await this.prismaService.user.create({
-      data: {
-        name: createUserDto.name,
-        email: createUserDto.email,
-        password: createUserDto.password,
-      },
+      data: { name, email, password },
     });
 
     return user;
@@ -34,12 +40,23 @@ export class UsersService {
   }
 
   async update(uuid: string, updateUserDto: UpdateUserDto) {
+    const { name, email, password } = updateUserDto;
+
+    if (email) {
+      const emailAlreadyInUse = await this.prismaService.user.findFirst({
+        where: {
+          email,
+          uuid: { not: uuid },
+        },
+      });
+
+      if (emailAlreadyInUse) {
+        throw new ConflictException('This email is already in use!');
+      }
+    }
+
     const user = await this.prismaService.user.update({
-      data: {
-        name: updateUserDto.name,
-        email: updateUserDto.email,
-        password: updateUserDto.password,
-      },
+      data: { name, email, password },
       where: { uuid },
     });
 
