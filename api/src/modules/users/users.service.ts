@@ -1,17 +1,17 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { PrismaService } from 'src/shared/database/prisma.service';
 import { hash } from 'bcryptjs';
+import { UsersRepository } from 'src/shared/database/repositories/users.repository';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(private readonly usersRepo: UsersRepository) {}
 
   async create(createUserDto: CreateUserDto) {
     const { name, email, password } = createUserDto;
 
-    const emailAlreadyInUse = await this.prismaService.user.findUnique({
+    const emailAlreadyInUse = await this.usersRepo.findUnique({
       where: { email },
       select: { id: true },
     });
@@ -22,7 +22,7 @@ export class UsersService {
 
     const hashedPassword = await hash(password, 12);
 
-    const user = await this.prismaService.user.create({
+    const user = await this.usersRepo.create({
       data: {
         name,
         email,
@@ -57,13 +57,13 @@ export class UsersService {
   }
 
   async findAll() {
-    const users = await this.prismaService.user.findMany();
+    const users = await this.usersRepo.findMany();
 
     return users;
   }
 
   async findOne(uuid: string) {
-    const users = await this.prismaService.user.findUnique({
+    const users = await this.usersRepo.findUnique({
       where: { uuid },
     });
 
@@ -75,7 +75,7 @@ export class UsersService {
     let { password } = updateUserDto;
 
     if (email) {
-      const emailAlreadyInUse = await this.prismaService.user.findFirst({
+      const emailAlreadyInUse = await this.usersRepo.findFirst({
         where: {
           email,
           uuid: { not: uuid },
@@ -92,7 +92,7 @@ export class UsersService {
       password = await hash(password, 12);
     }
 
-    const user = await this.prismaService.user.update({
+    const user = await this.usersRepo.update({
       data: { name, email, password },
       where: { uuid },
     });
@@ -101,7 +101,7 @@ export class UsersService {
   }
 
   async remove(uuid: string) {
-    await this.prismaService.user.delete({
+    await this.usersRepo.delete({
       where: { uuid },
     });
 
