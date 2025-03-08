@@ -3,6 +3,7 @@ import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { JwtModule } from '@nestjs/jwt';
 import { env } from 'src/shared/config/env';
+import { UsersModule } from '../users/users.module';
 
 @Module({
   imports: [
@@ -10,6 +11,7 @@ import { env } from 'src/shared/config/env';
       signOptions: { expiresIn: '7d' },
       secret: env.jwtSecret,
     }),
+    UsersModule,
   ],
   controllers: [AuthController],
   providers: [AuthService],

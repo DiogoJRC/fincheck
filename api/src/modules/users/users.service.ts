@@ -51,6 +51,7 @@ export class UsersService {
     });
 
     return {
+      uuid: user.uuid,
       name: user.name,
       email: user.email,
     };
