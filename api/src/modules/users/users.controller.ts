@@ -7,13 +7,11 @@ import {
   Param,
   Delete,
   Req,
-  UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Request } from 'express';
-import { AuthGuard } from '../auth/auth.guard';
 
 @Controller('users')
 export class UsersController {
@@ -30,7 +28,6 @@ export class UsersController {
   }
 
   @Get('/me')
-  @UseGuards(AuthGuard)
   me(@Req() request: Request & { userUuid: string }) {
     return this.usersService.getUserByUuid(request.userUuid);
   }
