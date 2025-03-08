@@ -63,7 +63,7 @@ export class UsersService {
     return users;
   }
 
-  async findOne(uuid: string) {
+  async getUserByUuid(uuid: string) {
     const users = await this.usersRepo.findUnique({
       where: { uuid },
     });
